@@ -103,6 +103,11 @@ namespace NzbDrone.Core.Indexers.FileList
             return pageableRequests;
         }
 
+        public IndexerPageableRequestChain GetSearchRequests(EpisodeTitleSearchCriteria titleSearchCriteria)
+        {
+            throw new NotImplementedException();
+        }
+
         public IndexerPageableRequestChain GetSearchRequests(SpecialEpisodeSearchCriteria searchCriteria)
         {
             return new IndexerPageableRequestChain();

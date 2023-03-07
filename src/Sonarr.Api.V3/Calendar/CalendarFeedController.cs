@@ -85,6 +85,9 @@ namespace Sonarr.Api.V3.Calendar
                     case SeriesTypes.Daily:
                         occurrence.Summary = $"{series.Title} - {episode.Title}";
                         break;
+                    case SeriesTypes.Episode_Title:
+                        occurrence.Summary = $"{series.Title} - {episode.SeasonNumber} - {episode.Title}";
+                        break;
                     default:
                         occurrence.Summary = $"{series.Title} - {episode.SeasonNumber}x{episode.EpisodeNumber:00} - {episode.Title}";
                         break;

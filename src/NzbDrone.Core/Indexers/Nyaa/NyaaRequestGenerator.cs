@@ -85,6 +85,11 @@ namespace NzbDrone.Core.Indexers.Nyaa
             return pageableRequests;
         }
 
+        public IndexerPageableRequestChain GetSearchRequests(EpisodeTitleSearchCriteria titleSearchCriteria)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public virtual IndexerPageableRequestChain GetSearchRequests(SpecialEpisodeSearchCriteria searchCriteria)
         {
             var pageableRequests = new IndexerPageableRequestChain();

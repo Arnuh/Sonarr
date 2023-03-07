@@ -78,6 +78,15 @@ namespace NzbDrone.Core.DecisionEngine
                 {
                     var parsedEpisodeInfo = Parser.Parser.ParseTitle(report.Title);
 
+                    if (searchCriteria is EpisodeTitleSearchCriteria titleSearchCriteria)
+                    {
+                        parsedEpisodeInfo.SeasonNumber = titleSearchCriteria.SeasonNumber;
+                        for (int i = 0; i < titleSearchCriteria.Episodes.Count; i++)
+                        {
+                            parsedEpisodeInfo.EpisodeNumbers[i] = titleSearchCriteria.Episodes[i].EpisodeNumber;
+                        }
+                    }
+
                     if (parsedEpisodeInfo == null || parsedEpisodeInfo.IsPossibleSpecialEpisode)
                     {
                         var specialEpisodeInfo = _parsingService.ParseSpecialEpisodeTitle(parsedEpisodeInfo, report.Title, report.TvdbId, report.TvRageId, searchCriteria);

@@ -354,6 +354,11 @@ namespace NzbDrone.Core.Indexers.Newznab
             return pageableRequests;
         }
 
+        public IndexerPageableRequestChain GetSearchRequests(EpisodeTitleSearchCriteria titleSearchCriteria)
+        {
+            throw new NotImplementedException();
+        }
+
         public virtual IndexerPageableRequestChain GetSearchRequests(SpecialEpisodeSearchCriteria searchCriteria)
         {
             var pageableRequests = new IndexerPageableRequestChain();

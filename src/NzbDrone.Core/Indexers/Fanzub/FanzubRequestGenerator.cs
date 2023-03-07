@@ -73,6 +73,11 @@ namespace NzbDrone.Core.Indexers.Fanzub
             return pageableRequests;
         }
 
+        public IndexerPageableRequestChain GetSearchRequests(EpisodeTitleSearchCriteria titleSearchCriteria)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public virtual IndexerPageableRequestChain GetSearchRequests(SpecialEpisodeSearchCriteria searchCriteria)
         {
             return new IndexerPageableRequestChain();

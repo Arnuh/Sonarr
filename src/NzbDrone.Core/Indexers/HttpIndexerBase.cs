@@ -99,6 +99,16 @@ namespace NzbDrone.Core.Indexers
             return FetchReleases(g => g.GetSearchRequests(searchCriteria));
         }
 
+        public override IList<ReleaseInfo> Fetch(EpisodeTitleSearchCriteria titleSearchCriteria)
+        {
+            if (!SupportsSearch)
+            {
+                return new List<ReleaseInfo>();
+            }
+
+            return FetchReleases(g => g.GetSearchRequests(titleSearchCriteria));
+        }
+
         public override IList<ReleaseInfo> Fetch(SpecialEpisodeSearchCriteria searchCriteria)
         {
             if (!SupportsSearch)

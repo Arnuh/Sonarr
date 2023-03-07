@@ -6,7 +6,8 @@ import EnhancedSelectInput from './EnhancedSelectInput';
 const seriesTypeOptions = [
   { key: seriesTypes.STANDARD, value: 'Standard' },
   { key: seriesTypes.DAILY, value: 'Daily' },
-  { key: seriesTypes.ANIME, value: 'Anime' }
+  { key: seriesTypes.ANIME, value: 'Anime' },
+  { key: seriesTypes.EPISODE_TITLE, value: 'Episode Title' }
 ];
 
 function SeriesTypeSelectInput(props) {

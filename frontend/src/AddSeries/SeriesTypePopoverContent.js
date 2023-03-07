@@ -19,6 +19,10 @@ function SeriesTypePopoverContent() {
         title="Standard"
         data="Episodes released with SxxEyy pattern"
       />
+      <DescriptionListItem
+        title="Episode Title"
+        data="Episodes identified by the Episode Title"
+      />
     </DescriptionList>
   );
 }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.ServiceProcess;
 using System.Threading.Tasks;
 using NLog;
 using NzbDrone.Common.Extensions;
@@ -83,6 +84,11 @@ namespace NzbDrone.Core.IndexerSearch
                 }
 
                 return SearchAnime(series, episode, false, userInvokedSearch, interactiveSearch);
+            }
+
+            if (series.SeriesType == SeriesTypes.Episode_Title)
+            {
+                return SearchEpisodeTitle(series, episode, false, userInvokedSearch, interactiveSearch);
             }
 
             if (episode.SeasonNumber == 0)
@@ -351,6 +357,20 @@ namespace NzbDrone.Core.IndexerSearch
 
             searchSpec.SeasonNumber = episode.SceneSeasonNumber ?? episode.SeasonNumber;
             searchSpec.EpisodeNumber = episode.SceneEpisodeNumber ?? episode.EpisodeNumber;
+            searchSpec.AbsoluteEpisodeNumber = episode.SceneAbsoluteEpisodeNumber ?? episode.AbsoluteEpisodeNumber ?? 0;
+
+            return Dispatch(indexer => indexer.Fetch(searchSpec), searchSpec);
+        }
+
+        private List<DownloadDecision> SearchEpisodeTitle(Series series, Episode episode, bool monitoredOnly, bool userInvokedSearch, bool interactiveSearch, bool isSeasonSearch = false)
+        {
+            var searchSpec = Get<EpisodeTitleSearchCriteria>(series, new List<Episode> { episode }, monitoredOnly, userInvokedSearch, interactiveSearch);
+
+            searchSpec.IsSeasonSearch = isSeasonSearch;
+
+            searchSpec.SeasonNumber = episode.SceneSeasonNumber ?? episode.SeasonNumber;
+            searchSpec.EpisodeNumber = episode.EpisodeNumber;
+            searchSpec.EpisodeTitle = episode.Title;
             searchSpec.AbsoluteEpisodeNumber = episode.SceneAbsoluteEpisodeNumber ?? episode.AbsoluteEpisodeNumber ?? 0;
 
             return Dispatch(indexer => indexer.Fetch(searchSpec), searchSpec);
