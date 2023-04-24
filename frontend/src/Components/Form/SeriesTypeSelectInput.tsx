@@ -33,6 +33,11 @@ const seriesTypeOptions: ISeriesTypeOption[] = [
     value: 'Anime / Absolute',
     format: 'Absolute episode Number (005)',
   },
+  {
+    key: seriesTypes.EPISODE_TITLE,
+    value: 'Episode Title',
+    format: 'Episodes identified by the Episode Title',
+  }
 ];
 
 function SeriesTypeSelectInput(props: SeriesTypeSelectInputProps) {
