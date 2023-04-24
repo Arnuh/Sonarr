@@ -149,7 +149,7 @@ namespace NzbDrone.Core.Extras.Subtitles
                                               .Where(file => MediaFileExtensions.Extensions.Contains(Path.GetExtension(file)))
                                               .ToList();
 
-                if (videoFiles.Count() > 2)
+                if (videoFiles.Count > 2)
                 {
                     return importedFiles;
                 }
@@ -234,19 +234,19 @@ namespace NzbDrone.Core.Extras.Subtitles
 
             if (multipleCopies)
             {
-                suffixBuilder.Append(".");
+                suffixBuilder.Append('.');
                 suffixBuilder.Append(copy);
             }
 
             if (language != Language.Unknown)
             {
-                suffixBuilder.Append(".");
+                suffixBuilder.Append('.');
                 suffixBuilder.Append(IsoLanguages.Get(language).TwoLetterCode);
             }
 
             if (languageTags.Any())
             {
-                suffixBuilder.Append(".");
+                suffixBuilder.Append('.');
                 suffixBuilder.Append(string.Join(".", languageTags));
             }
 

@@ -10,6 +10,7 @@ import DeleteSeriesModal from 'Series/Delete/DeleteSeriesModal';
 import EditSeriesModalConnector from 'Series/Edit/EditSeriesModalConnector';
 import SeriesIndexProgressBar from 'Series/Index/ProgressBar/SeriesIndexProgressBar';
 import SeriesIndexPosterSelect from 'Series/Index/Select/SeriesIndexPosterSelect';
+import { Statistics } from 'Series/Series';
 import SeriesPoster from 'Series/SeriesPoster';
 import { executeCommand } from 'Store/Actions/commandActions';
 import dimensions from 'Styles/Variables/dimensions';
@@ -66,7 +67,7 @@ function SeriesIndexOverview(props: SeriesIndexOverviewProps) {
     previousAiring,
     added,
     overview,
-    statistics = {},
+    statistics = {} as Statistics,
     images,
     network,
   } = series;
@@ -159,13 +160,15 @@ function SeriesIndexOverview(props: SeriesIndexOverviewProps) {
           </div>
 
           <SeriesIndexProgressBar
+            seriesId={seriesId}
             monitored={monitored}
             status={status}
             episodeCount={episodeCount}
             episodeFileCount={episodeFileCount}
             totalEpisodeCount={totalEpisodeCount}
-            posterWidth={posterWidth}
+            width={posterWidth}
             detailedProgressBar={overviewOptions.detailedProgressBar}
+            isStandalone={false}
           />
         </div>
 

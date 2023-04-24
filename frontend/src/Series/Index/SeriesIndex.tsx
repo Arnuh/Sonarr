@@ -1,6 +1,14 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { SelectProvider } from 'App/SelectContext';
+import ClientSideCollectionAppState from 'App/State/ClientSideCollectionAppState';
+import SeriesAppState, { SeriesIndexAppState } from 'App/State/SeriesAppState';
 import { REFRESH_SERIES, RSS_SYNC } from 'Commands/commandNames';
 import LoadingIndicator from 'Components/Loading/LoadingIndicator';
 import PageContent from 'Components/Page/PageContent';
@@ -16,6 +24,8 @@ import { align, icons } from 'Helpers/Props';
 import SortDirection from 'Helpers/Props/SortDirection';
 import NoSeries from 'Series/NoSeries';
 import { executeCommand } from 'Store/Actions/commandActions';
+import { fetchQueueDetails } from 'Store/Actions/queueActions';
+import { fetchSeries } from 'Store/Actions/seriesActions';
 import {
   setSeriesFilter,
   setSeriesSort,
@@ -43,7 +53,7 @@ import SeriesIndexTable from './Table/SeriesIndexTable';
 import SeriesIndexTableOptions from './Table/SeriesIndexTableOptions';
 import styles from './SeriesIndex.css';
 
-function getViewComponent(view) {
+function getViewComponent(view: string) {
   if (view === 'posters') {
     return SeriesIndexPosters;
   }
@@ -73,7 +83,8 @@ const SeriesIndex = withScrollPosition((props: SeriesIndexProps) => {
     sortKey,
     sortDirection,
     view,
-  } = useSelector(createSeriesClientSideCollectionItemsSelector('seriesIndex'));
+  }: SeriesAppState & SeriesIndexAppState & ClientSideCollectionAppState =
+    useSelector(createSeriesClientSideCollectionItemsSelector('seriesIndex'));
 
   const isRefreshingSeries = useSelector(
     createCommandExecutingSelector(REFRESH_SERIES)
@@ -83,10 +94,17 @@ const SeriesIndex = withScrollPosition((props: SeriesIndexProps) => {
   );
   const { isSmallScreen } = useSelector(createDimensionsSelector());
   const dispatch = useDispatch();
-  const scrollerRef = useRef<HTMLDivElement>();
+  const scrollerRef = useRef<HTMLDivElement>(null);
   const [isOptionsModalOpen, setIsOptionsModalOpen] = useState(false);
-  const [jumpToCharacter, setJumpToCharacter] = useState<string | null>(null);
+  const [jumpToCharacter, setJumpToCharacter] = useState<string | undefined>(
+    undefined
+  );
   const [isSelectMode, setIsSelectMode] = useState(false);
+
+  useEffect(() => {
+    dispatch(fetchSeries());
+    dispatch(fetchQueueDetails({ all: true }));
+  }, [dispatch]);
 
   const onRefreshSeriesPress = useCallback(() => {
     dispatch(
@@ -109,14 +127,14 @@ const SeriesIndex = withScrollPosition((props: SeriesIndexProps) => {
   }, [isSelectMode, setIsSelectMode]);
 
   const onTableOptionChange = useCallback(
-    (payload) => {
+    (payload: unknown) => {
       dispatch(setSeriesTableOption(payload));
     },
     [dispatch]
   );
 
   const onViewSelect = useCallback(
-    (value) => {
+    (value: string) => {
       dispatch(setSeriesView({ view: value }));
 
       if (scrollerRef.current) {
@@ -127,14 +145,14 @@ const SeriesIndex = withScrollPosition((props: SeriesIndexProps) => {
   );
 
   const onSortSelect = useCallback(
-    (value) => {
+    (value: string) => {
       dispatch(setSeriesSort({ sortKey: value }));
     },
     [dispatch]
   );
 
   const onFilterSelect = useCallback(
-    (value) => {
+    (value: string) => {
       dispatch(setSeriesFilter({ selectedFilterKey: value }));
     },
     [dispatch]
@@ -149,15 +167,15 @@ const SeriesIndex = withScrollPosition((props: SeriesIndexProps) => {
   }, [setIsOptionsModalOpen]);
 
   const onJumpBarItemPress = useCallback(
-    (character) => {
+    (character: string) => {
       setJumpToCharacter(character);
     },
     [setJumpToCharacter]
   );
 
   const onScroll = useCallback(
-    ({ scrollTop }) => {
-      setJumpToCharacter(null);
+    ({ scrollTop }: { scrollTop: number }) => {
+      setJumpToCharacter(undefined);
       scrollPositions.seriesIndex = scrollTop;
     },
     [setJumpToCharacter]
@@ -171,10 +189,10 @@ const SeriesIndex = withScrollPosition((props: SeriesIndexProps) => {
       };
     }
 
-    const characters = items.reduce((acc, item) => {
+    const characters = items.reduce((acc: Record<string, number>, item) => {
       let char = item.sortTitle.charAt(0);
 
-      if (!isNaN(char)) {
+      if (!isNaN(Number(char))) {
         char = '#';
       }
 
@@ -292,6 +310,8 @@ const SeriesIndex = withScrollPosition((props: SeriesIndexProps) => {
           <PageContentBody
             ref={scrollerRef}
             className={styles.contentBody}
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore
             innerClassName={styles[`${view}InnerContentBody`]}
             initialScrollTop={props.initialScrollTop}
             onScroll={onScroll}

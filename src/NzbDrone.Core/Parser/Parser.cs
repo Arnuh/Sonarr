@@ -172,7 +172,7 @@ namespace NzbDrone.Core.Parser
                     RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
                 // Episodes with a title, Single episodes (S01E05, 1x05, etc) & Multi-episode (S01E05E06, S01E05-06, S01E05 E06, etc)
-                new Regex(@"^(?<title>.+?)(?:(?:[-_\W](?<![()\[!]))+S?(?<season>(?<!\d+)(?:\d{1,2})(?!\d+))(?:[ex]|\W[ex]){1,2}(?<episode>\d{2,3}(?!\d+))(?:(?:\-|[ex]|\W[ex]|_){1,2}(?<episode>\d{2,3}(?!\d+)))*)\W?(?!\\)",
+                new Regex(@"^(?<title>.+?)(?:(?:[-_\W](?<![()\[!]))+S?(?<season>(?<!\d+)(?:\d{1,2})(?!\d+))(?:[ex]|\W[ex]){1,2}(?<episode>\d{2,3}(?!\d+))(?:(?:\-|[ex]|\W[ex]|_){1,2}(?<episode>\d{2,3}(?!\d+)))*)(?:[-_. ]|$)(?!\\)",
                           RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
                 // Episodes with a title, 4 digit season number, Single episodes (S2016E05, etc) & Multi-episode (S2016E05E06, S2016E05-06, S2016E05 E06, etc)
@@ -184,7 +184,7 @@ namespace NzbDrone.Core.Parser
                           RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
                 // Multi-season pack
-                new Regex(@"^(?<title>.+?)[-_. ]+(?:S|(?:Season|Saison|Series|Stagione)[_. ])(?<season>(?<!\d+)(?:\d{1,2})(?!\d+))(?:-|[-_. ]{3})(?:S|(?:Season|Saison|Series|Stagione)[_. ])?(?<season>(?<!\d+)(?:\d{1,2})(?!\d+))",
+                new Regex(@"^(?<title>.+?)(Complete Series)?[-_. ]+(?:S|(?:Season|Saison|Series|Stagione)[_. ])(?<season>(?<!\d+)(?:\d{1,2})(?!\d+))(?:[-_. ]{1}|[-_. ]{3})(?:S|(?:Season|Saison|Series|Stagione)[_. ])?(?<season>(?<!\d+)(?:\d{1,2})(?!\d+))",
                     RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
                 // Partial season pack
@@ -229,7 +229,11 @@ namespace NzbDrone.Core.Parser
 
                 // Multi-episode with episodes in square brackets (Series Title [S01E11E12] or Series Title [S01E11-12])
                 new Regex(@"(?:.*(?:^))(?<title>.*?)[-._ ]+\[S(?<season>(?<!\d+)\d{2}(?!\d+))(?:[E-]{1,2}(?<episode>(?<!\d+)\d{2}(?!\d+)))+\]",
-                    RegexOptions.IgnoreCase | RegexOptions.Compiled),
+                          RegexOptions.IgnoreCase | RegexOptions.Compiled),
+
+                // Multi-episode with episodes in brackets (Series Title (S01E11E12) or Series Title (S01E11-12))
+                new Regex(@"(?:.*(?:^))(?<title>.*?)[-._ ]+\(S(?<season>(?<!\d+)\d{2}(?!\d+))(?:[E-]{1,2}(?<episode>(?<!\d+)\d{2}(?!\d+)))+\)",
+                          RegexOptions.IgnoreCase | RegexOptions.Compiled),
 
                 // Multi-episode release with no space between series title and season (S01E11E12)
                 new Regex(@"(?:.*(?:^))(?<title>.*?)S(?<season>(?<!\d+)\d{2}(?!\d+))(?:E(?<episode>(?<!\d+)\d{2}(?!\d+)))+",
@@ -516,6 +520,31 @@ namespace NzbDrone.Core.Parser
 
             var result = ParseTitle(fileInfo.Name);
 
+            if (result == null && int.TryParse(Path.GetFileNameWithoutExtension(fileInfo.Name), out var number))
+            {
+                Logger.Debug("Attempting to parse episode info using directory and file names. {0}", fileInfo.Directory.Name);
+                result = ParseTitle(fileInfo.Directory.Name);
+
+                if (result != null && result.AbsoluteEpisodeNumbers.Contains(number))
+                {
+                    result.AbsoluteEpisodeNumbers = new[] { number };
+                }
+                else if (result != null && result.EpisodeNumbers.Contains(number))
+                {
+                    result.EpisodeNumbers = new[] { number };
+                }
+                else
+                {
+                    result = null;
+                }
+            }
+
+            if (result == null)
+            {
+                Logger.Debug("Attempting to parse episode info using combined directory and file names. {0}", fileInfo.Directory.Name);
+                result = ParseTitle(fileInfo.Directory.Name + " " + fileInfo.Name);
+            }
+
             if (result == null)
             {
                 Logger.Debug("Attempting to parse episode info using directory and file names. {0}", fileInfo.Directory.Name);
@@ -545,7 +574,7 @@ namespace NzbDrone.Core.Parser
                 var titleWithoutExtension = RemoveFileExtension(title).ToCharArray();
                 Array.Reverse(titleWithoutExtension);
 
-                title = new string(titleWithoutExtension) + title.Substring(titleWithoutExtension.Length);
+                title = string.Concat(new string(titleWithoutExtension), title.AsSpan(titleWithoutExtension.Length));
 
                 Logger.Debug("Reversed name detected. Converted to '{0}'", title);
             }
@@ -576,7 +605,7 @@ namespace NzbDrone.Core.Parser
                     var titleWithoutExtension = RemoveFileExtension(title).ToCharArray();
                     Array.Reverse(titleWithoutExtension);
 
-                    title = new string(titleWithoutExtension) + title.Substring(titleWithoutExtension.Length);
+                    title = string.Concat(new string(titleWithoutExtension), title.AsSpan(titleWithoutExtension.Length));
 
                     Logger.Debug("Reversed name detected. Converted to '{0}'", title);
                 }
@@ -890,8 +919,8 @@ namespace NzbDrone.Core.Parser
                 result = new ParsedEpisodeInfo
                 {
                     ReleaseTitle = releaseTitle,
-                    EpisodeNumbers = new int[0],
-                    AbsoluteEpisodeNumbers = new int[0]
+                    EpisodeNumbers = Array.Empty<int>(),
+                    AbsoluteEpisodeNumbers = Array.Empty<int>()
                 };
 
                 foreach (Match matchGroup in matchCollection)

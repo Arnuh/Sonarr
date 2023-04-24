@@ -13,7 +13,7 @@ namespace Sonarr.Http.ClientSchema
 {
     public static class SchemaBuilder
     {
-        private static readonly string PRIVATE_VALUE = "********";
+        private const string PRIVATE_VALUE = "********";
         private static Dictionary<Type, FieldMapping[]> _mappings = new Dictionary<Type, FieldMapping[]>();
 
         public static List<Field> ToSchema(object model)
@@ -119,7 +119,8 @@ namespace Sonarr.Http.ClientSchema
                         Advanced = fieldAttribute.Advanced,
                         Type = fieldAttribute.Type.ToString().FirstCharToLower(),
                         Section = fieldAttribute.Section,
-                        Privacy = fieldAttribute.Privacy
+                        Privacy = fieldAttribute.Privacy,
+                        Placeholder = fieldAttribute.Placeholder
                     };
 
                     if (fieldAttribute.Type == FieldType.Select || fieldAttribute.Type == FieldType.TagSelect)

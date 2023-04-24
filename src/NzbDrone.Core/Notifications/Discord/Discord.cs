@@ -69,7 +69,7 @@ namespace NzbDrone.Core.Notifications.Discord
                     case DiscordGrabFieldType.Overview:
                         var overview = episodes.First().Overview ?? "";
                         discordField.Name = "Overview";
-                        discordField.Value = overview.Length <= 300 ? overview : overview.Substring(0, 300) + "...";
+                        discordField.Value = overview.Length <= 300 ? overview : $"{overview.AsSpan(0, 300)}...";
                         break;
                     case DiscordGrabFieldType.Rating:
                         discordField.Name = "Rating";
@@ -100,6 +100,10 @@ namespace NzbDrone.Core.Notifications.Discord
                     case DiscordGrabFieldType.Links:
                         discordField.Name = "Links";
                         discordField.Value = GetLinksString(series);
+                        break;
+                    case DiscordGrabFieldType.Indexer:
+                        discordField.Name = "Indexer";
+                        discordField.Value = message.Episode.Release.Indexer;
                         break;
                 }
 
@@ -160,7 +164,7 @@ namespace NzbDrone.Core.Notifications.Discord
                     case DiscordImportFieldType.Overview:
                         var overview = episodes.First().Overview ?? "";
                         discordField.Name = "Overview";
-                        discordField.Value = overview.Length <= 300 ? overview : overview.Substring(0, 300) + "...";
+                        discordField.Value = overview.Length <= 300 ? overview : $"{overview.AsSpan(0, 300)}...";
                         break;
                     case DiscordImportFieldType.Rating:
                         discordField.Name = "Rating";
@@ -250,6 +254,24 @@ namespace NzbDrone.Core.Notifications.Discord
                               };
 
             var payload = CreatePayload("Episode Deleted", attachments);
+
+            _proxy.SendPayload(payload, Settings);
+        }
+
+        public override void OnSeriesAdd(SeriesAddMessage message)
+        {
+            var series = message.Series;
+
+            var attachments = new List<Embed>
+                              {
+                                  new Embed
+                                  {
+                                      Title = series.Title,
+                                      Description = message.Message
+                                  }
+                              };
+
+            var payload = CreatePayload("Series Added", attachments);
 
             _proxy.SendPayload(payload, Settings);
         }

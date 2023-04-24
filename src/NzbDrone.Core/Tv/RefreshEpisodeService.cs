@@ -75,6 +75,7 @@ namespace NzbDrone.Core.Tv
                     episodeToUpdate.Overview = episode.Overview;
                     episodeToUpdate.AirDate = episode.AirDate;
                     episodeToUpdate.AirDateUtc = episode.AirDateUtc;
+                    episodeToUpdate.Runtime = episode.Runtime;
                     episodeToUpdate.Ratings = episode.Ratings;
                     episodeToUpdate.Images = episode.Images;
 
@@ -185,7 +186,7 @@ namespace NzbDrone.Core.Tv
             }
         }
 
-        private void AdjustDirectToDvdAirDate(Series series, IEnumerable<Episode> allEpisodes)
+        private void AdjustDirectToDvdAirDate(Series series, IList<Episode> allEpisodes)
         {
             if (series.Status == SeriesStatusType.Ended && allEpisodes.All(v => !v.AirDateUtc.HasValue) && series.FirstAired.HasValue)
             {

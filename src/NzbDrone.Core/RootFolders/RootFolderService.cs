@@ -72,7 +72,7 @@ namespace NzbDrone.Core.RootFolders
             {
                 try
                 {
-                    if (folder.Path.IsPathValid())
+                    if (folder.Path.IsPathValid(PathValidationType.CurrentOs))
                     {
                         GetDetails(folder, seriesPaths, true);
                     }
@@ -186,9 +186,7 @@ namespace NzbDrone.Core.RootFolders
 
         public string GetBestRootFolderPath(string path)
         {
-            var possibleRootFolder = All().Where(r => r.Path.IsParentPath(path))
-                                          .OrderByDescending(r => r.Path.Length)
-                                          .FirstOrDefault();
+            var possibleRootFolder = All().Where(r => r.Path.IsParentPath(path)).MaxBy(r => r.Path.Length);
 
             if (possibleRootFolder == null)
             {

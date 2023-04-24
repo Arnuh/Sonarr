@@ -47,7 +47,7 @@ namespace NzbDrone.Core.DecisionEngine
 
         public List<DownloadDecision> GetRssDecision(List<ReleaseInfo> reports, bool pushedRelease = false)
         {
-            return GetDecisions(reports).ToList();
+            return GetDecisions(reports, pushedRelease).ToList();
         }
 
         public List<DownloadDecision> GetSearchDecision(List<ReleaseInfo> reports, SearchCriteriaBase searchCriteriaBase)
@@ -55,7 +55,7 @@ namespace NzbDrone.Core.DecisionEngine
             return GetDecisions(reports, false, searchCriteriaBase).ToList();
         }
 
-        private IEnumerable<DownloadDecision> GetDecisions(List<ReleaseInfo> reports, bool pushedRelease = false, SearchCriteriaBase searchCriteria = null)
+        private IEnumerable<DownloadDecision> GetDecisions(List<ReleaseInfo> reports, bool pushedRelease, SearchCriteriaBase searchCriteria = null)
         {
             if (reports.Any())
             {
@@ -187,11 +187,11 @@ namespace NzbDrone.Core.DecisionEngine
 
                     if (decision.Rejections.Any())
                     {
-                        _logger.Debug("Release rejected for the following reasons: {0}", string.Join(", ", decision.Rejections));
+                        _logger.Debug("Release '{0}' from '{1}' rejected for the following reasons: {2}", report.Title, report.Indexer, string.Join(", ", decision.Rejections));
                     }
                     else
                     {
-                        _logger.Debug("Release accepted");
+                        _logger.Debug("Release '{0}' from '{1}' accepted", report.Title, report.Indexer);
                     }
 
                     yield return decision;
@@ -201,7 +201,7 @@ namespace NzbDrone.Core.DecisionEngine
 
         private DownloadDecision GetDecisionForReport(RemoteEpisode remoteEpisode, SearchCriteriaBase searchCriteria = null)
         {
-            var reasons = new Rejection[0];
+            var reasons = Array.Empty<Rejection>();
 
             foreach (var specifications in _specifications.GroupBy(v => v.Priority).OrderBy(v => v.Key))
             {

@@ -88,6 +88,7 @@ namespace NzbDrone.Core.Datastore
                   .Ignore(i => i.SupportsOnDownload)
                   .Ignore(i => i.SupportsOnUpgrade)
                   .Ignore(i => i.SupportsOnRename)
+                  .Ignore(i => i.SupportsOnSeriesAdd)
                   .Ignore(i => i.SupportsOnSeriesDelete)
                   .Ignore(i => i.SupportsOnEpisodeFileDelete)
                   .Ignore(i => i.SupportsOnEpisodeFileDeleteForUpgrade)
@@ -114,7 +115,7 @@ namespace NzbDrone.Core.Datastore
             Mapper.Entity<EpisodeFile>("EpisodeFiles").RegisterModel()
                   .HasOne(f => f.Series, f => f.SeriesId)
                   .LazyLoad(x => x.Episodes,
-                            (db, parent) => db.Query<Episode>(new SqlBuilder()).Where(c => c.EpisodeFileId == parent.Id).ToList(),
+                            (db, parent) => db.Query<Episode>(new SqlBuilder().Where<Episode>(c => c.EpisodeFileId == parent.Id)).ToList(),
                             t => t.Id > 0)
                   .Ignore(f => f.Path);
 

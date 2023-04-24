@@ -1,14 +1,13 @@
 import classNames from 'classnames';
 import React, { useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { SelectActionType, useSelect } from 'App/SelectContext';
+import { useSelect } from 'App/SelectContext';
 import { REFRESH_SERIES, SERIES_SEARCH } from 'Commands/commandNames';
 import CheckInput from 'Components/Form/CheckInput';
 import HeartRating from 'Components/HeartRating';
 import IconButton from 'Components/Link/IconButton';
 import Link from 'Components/Link/Link';
 import SpinnerIconButton from 'Components/Link/SpinnerIconButton';
-import ProgressBar from 'Components/ProgressBar';
 import RelativeDateCellConnector from 'Components/Table/Cells/RelativeDateCellConnector';
 import VirtualTableRowCell from 'Components/Table/Cells/VirtualTableRowCell';
 import VirtualTableSelectCell from 'Components/Table/Cells/VirtualTableSelectCell';
@@ -18,12 +17,14 @@ import { icons } from 'Helpers/Props';
 import DeleteSeriesModal from 'Series/Delete/DeleteSeriesModal';
 import EditSeriesModalConnector from 'Series/Edit/EditSeriesModalConnector';
 import createSeriesIndexItemSelector from 'Series/Index/createSeriesIndexItemSelector';
+import { Statistics } from 'Series/Series';
 import SeriesBanner from 'Series/SeriesBanner';
 import SeriesTitleLink from 'Series/SeriesTitleLink';
 import { executeCommand } from 'Store/Actions/commandActions';
+import { SelectStateInputProps } from 'typings/props';
 import formatBytes from 'Utilities/Number/formatBytes';
-import getProgressBarKind from 'Utilities/Series/getProgressBarKind';
 import titleCase from 'Utilities/String/titleCase';
+import SeriesIndexProgressBar from '../ProgressBar/SeriesIndexProgressBar';
 import hasGrowableColumns from './hasGrowableColumns';
 import SeasonsCell from './SeasonsCell';
 import selectTableOptions from './selectTableOptions';
@@ -59,7 +60,7 @@ function SeriesIndexRow(props: SeriesIndexRowProps) {
     nextAiring,
     previousAiring,
     added,
-    statistics = {},
+    statistics = {} as Statistics,
     seasonFolder,
     images,
     seriesType,
@@ -138,9 +139,9 @@ function SeriesIndexRow(props: SeriesIndexRowProps) {
   }, []);
 
   const onSelectedChange = useCallback(
-    ({ id, value, shiftKey }) => {
+    ({ id, value, shiftKey }: SelectStateInputProps) => {
       selectDispatch({
-        type: SelectActionType.ToggleSelected,
+        type: 'toggleSelected',
         id,
         isSelected: value,
         shiftKey,
@@ -248,6 +249,8 @@ function SeriesIndexRow(props: SeriesIndexRowProps) {
 
         if (name === 'nextAiring') {
           return (
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore ts(2739)
             <RelativeDateCellConnector
               key={name}
               className={styles[name]}
@@ -259,6 +262,8 @@ function SeriesIndexRow(props: SeriesIndexRowProps) {
 
         if (name === 'previousAiring') {
           return (
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore ts(2739)
             <RelativeDateCellConnector
               key={name}
               className={styles[name]}
@@ -270,6 +275,8 @@ function SeriesIndexRow(props: SeriesIndexRowProps) {
 
         if (name === 'added') {
           return (
+            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+            // @ts-ignore ts(2739)
             <RelativeDateCellConnector
               key={name}
               className={styles[name]}
@@ -306,19 +313,18 @@ function SeriesIndexRow(props: SeriesIndexRowProps) {
         }
 
         if (name === 'episodeProgress') {
-          const progress = episodeCount
-            ? (episodeFileCount / episodeCount) * 100
-            : 100;
-
           return (
             <VirtualTableRowCell key={name} className={styles[name]}>
-              <ProgressBar
-                progress={progress}
-                kind={getProgressBarKind(status, monitored, progress)}
-                showText={true}
-                text={`${episodeFileCount} / ${episodeCount}`}
-                title={`${episodeFileCount} / ${episodeCount} (Total: ${totalEpisodeCount})`}
+              <SeriesIndexProgressBar
+                seriesId={seriesId}
+                monitored={monitored}
+                status={status}
+                episodeCount={episodeCount}
+                episodeFileCount={episodeFileCount}
+                totalEpisodeCount={totalEpisodeCount}
                 width={125}
+                detailedProgressBar={true}
+                isStandalone={true}
               />
             </VirtualTableRowCell>
           );
@@ -330,21 +336,20 @@ function SeriesIndexRow(props: SeriesIndexRowProps) {
           }
 
           const seasonStatistics = latestSeason.statistics || {};
-          const progress = seasonStatistics.episodeCount
-            ? (seasonStatistics.episodeFileCount /
-                seasonStatistics.episodeCount) *
-              100
-            : 100;
 
           return (
             <VirtualTableRowCell key={name} className={styles[name]}>
-              <ProgressBar
-                progress={progress}
-                kind={getProgressBarKind(status, monitored, progress)}
-                showText={true}
-                text={`${seasonStatistics.episodeFileCount} / ${seasonStatistics.episodeCount}`}
-                title={`${seasonStatistics.episodeFileCount} / ${seasonStatistics.episodeCount} (Total: ${seasonStatistics.totalEpisodeCount})`}
+              <SeriesIndexProgressBar
+                seriesId={seriesId}
+                seasonNumber={latestSeason.seasonNumber}
+                monitored={monitored}
+                status={status}
+                episodeCount={seasonStatistics.episodeCount}
+                episodeFileCount={seasonStatistics.episodeFileCount}
+                totalEpisodeCount={seasonStatistics.totalEpisodeCount}
                 width={125}
+                detailedProgressBar={true}
+                isStandalone={true}
               />
             </VirtualTableRowCell>
           );

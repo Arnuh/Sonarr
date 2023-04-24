@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using FluentValidation.Results;
@@ -80,7 +80,14 @@ namespace NzbDrone.Core.Download.Clients.Transmission
 
                 if (torrent.Eta >= 0)
                 {
-                    item.RemainingTime = TimeSpan.FromSeconds(torrent.Eta);
+                    try
+                    {
+                        item.RemainingTime = TimeSpan.FromSeconds(torrent.Eta);
+                    }
+                    catch (OverflowException)
+                    {
+                        item.RemainingTime = TimeSpan.FromMilliseconds(torrent.Eta);
+                    }
                 }
 
                 if (!torrent.ErrorString.IsNullOrWhiteSpace())
@@ -164,12 +171,21 @@ namespace NzbDrone.Core.Download.Clients.Transmission
 
         public override DownloadClientInfo GetStatus()
         {
-            var config = _proxy.GetConfig(Settings);
-            var destDir = config.DownloadDir;
+            string destDir;
 
-            if (Settings.TvCategory.IsNotNullOrWhiteSpace())
+            if (Settings.TvDirectory.IsNotNullOrWhiteSpace())
             {
-                destDir = string.Format("{0}/.{1}", destDir, Settings.TvCategory);
+                destDir = Settings.TvDirectory;
+            }
+            else
+            {
+                var config = _proxy.GetConfig(Settings);
+                destDir = config.DownloadDir;
+
+                if (Settings.TvCategory.IsNotNullOrWhiteSpace())
+                {
+                    destDir = $"{destDir}/{Settings.TvCategory}";
+                }
             }
 
             return new DownloadClientInfo

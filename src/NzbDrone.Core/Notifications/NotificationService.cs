@@ -19,6 +19,7 @@ namespace NzbDrone.Core.Notifications
         : IHandle<EpisodeGrabbedEvent>,
           IHandle<EpisodeImportedEvent>,
           IHandle<SeriesRenamedEvent>,
+          IHandle<SeriesAddCompletedEvent>,
           IHandle<SeriesDeletedEvent>,
           IHandle<EpisodeFileDeletedEvent>,
           IHandle<HealthCheckFailedEvent>,
@@ -157,7 +158,8 @@ namespace NzbDrone.Core.Notifications
                 OldFiles = message.OldFiles,
                 SourcePath = message.EpisodeInfo.Path,
                 DownloadClientInfo = message.DownloadClientInfo,
-                DownloadId = message.DownloadId
+                DownloadId = message.DownloadId,
+                Release = message.EpisodeInfo.Release
             };
 
             foreach (var notification in _notificationFactory.OnDownloadEnabled())
@@ -242,6 +244,31 @@ namespace NzbDrone.Core.Notifications
                         {
                             notification.OnEpisodeFileDelete(deleteMessage);
                         }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.Warn(ex, "Unable to send OnDelete notification to: " + notification.Definition.Name);
+                }
+            }
+        }
+
+        public void Handle(SeriesAddCompletedEvent message)
+        {
+            var series = message.Series;
+            var addMessage = new SeriesAddMessage
+            {
+                Series = series,
+                Message = series.Title
+            };
+
+            foreach (var notification in _notificationFactory.OnSeriesAddEnabled())
+            {
+                try
+                {
+                    if (ShouldHandleSeries(notification.Definition, series))
+                    {
+                        notification.OnSeriesAdd(addMessage);
                     }
                 }
                 catch (Exception ex)

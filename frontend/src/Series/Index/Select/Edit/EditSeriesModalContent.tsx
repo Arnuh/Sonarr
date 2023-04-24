@@ -54,7 +54,7 @@ function EditSeriesModalContent(props: EditSeriesModalContentProps) {
   const [isConfirmMoveModalOpen, setIsConfirmMoveModalOpen] = useState(false);
 
   const save = useCallback(
-    (moveFiles) => {
+    (moveFiles: boolean) => {
       let hasChanges = false;
       const payload: SavePayload = {};
 
@@ -102,7 +102,7 @@ function EditSeriesModalContent(props: EditSeriesModalContentProps) {
   );
 
   const onInputChange = useCallback(
-    ({ name, value }) => {
+    ({ name, value }: { name: string; value: string }) => {
       switch (name) {
         case 'monitored':
           setMonitored(value);
@@ -133,6 +133,10 @@ function EditSeriesModalContent(props: EditSeriesModalContentProps) {
       setIsConfirmMoveModalOpen(true);
     }
   }, [rootFolderPath, save]);
+
+  const onCancelPress = useCallback(() => {
+    setIsConfirmMoveModalOpen(false);
+  }, [setIsConfirmMoveModalOpen]);
 
   const onDoNotMoveSeriesPress = useCallback(() => {
     setIsConfirmMoveModalOpen(false);
@@ -185,6 +189,9 @@ function EditSeriesModalContent(props: EditSeriesModalContentProps) {
             value={seriesType}
             includeNoChange={true}
             includeNoChangeDisabled={false}
+            helpText={translate(
+              'Series type is used for renaming, parsing and searching'
+            )}
             onChange={onInputChange}
           />
         </FormGroup>
@@ -236,6 +243,7 @@ function EditSeriesModalContent(props: EditSeriesModalContentProps) {
       <MoveSeriesModal
         isOpen={isConfirmMoveModalOpen}
         destinationRootFolder={rootFolderPath}
+        onModalClose={onCancelPress}
         onSavePress={onDoNotMoveSeriesPress}
         onMoveSeriesPress={onMoveSeriesPress}
       />
