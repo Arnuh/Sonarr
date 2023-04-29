@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using DryIoc.ImTools;
 using NLog;
 using NzbDrone.Common.Extensions;
 using NzbDrone.Common.Instrumentation.Extensions;
@@ -80,11 +81,10 @@ namespace NzbDrone.Core.DecisionEngine
 
                     if (searchCriteria is EpisodeTitleSearchCriteria titleSearchCriteria)
                     {
+                        // Sonarr has a ton of information but none of it is inputted into ParseTitle
+                        // Ignore the parsed result and override with the information we know is correct.
                         parsedEpisodeInfo.SeasonNumber = titleSearchCriteria.SeasonNumber;
-                        for (int i = 0; i < titleSearchCriteria.Episodes.Count; i++)
-                        {
-                            parsedEpisodeInfo.EpisodeNumbers[i] = titleSearchCriteria.Episodes[i].EpisodeNumber;
-                        }
+                        parsedEpisodeInfo.EpisodeNumbers = titleSearchCriteria.Episodes.Map(ep => ep.EpisodeNumber).ToArray();
                     }
 
                     if (parsedEpisodeInfo == null || parsedEpisodeInfo.IsPossibleSpecialEpisode)
