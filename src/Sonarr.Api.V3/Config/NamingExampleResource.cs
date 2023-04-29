@@ -1,4 +1,4 @@
-﻿using NzbDrone.Core.Organizer;
+using NzbDrone.Core.Organizer;
 
 namespace Sonarr.Api.V3.Config
 {
@@ -24,7 +24,8 @@ namespace Sonarr.Api.V3.Config
 
                 RenameEpisodes = model.RenameEpisodes,
                 ReplaceIllegalCharacters = model.ReplaceIllegalCharacters,
-                MultiEpisodeStyle = model.MultiEpisodeStyle,
+                ColonReplacementFormat = (int)model.ColonReplacementFormat,
+                MultiEpisodeStyle = (int)model.MultiEpisodeStyle,
                 StandardEpisodeFormat = model.StandardEpisodeFormat,
                 DailyEpisodeFormat = model.DailyEpisodeFormat,
                 AnimeEpisodeFormat = model.AnimeEpisodeFormat,
@@ -59,7 +60,8 @@ namespace Sonarr.Api.V3.Config
 
                 RenameEpisodes = resource.RenameEpisodes,
                 ReplaceIllegalCharacters = resource.ReplaceIllegalCharacters,
-                MultiEpisodeStyle = resource.MultiEpisodeStyle,
+                MultiEpisodeStyle = (MultiEpisodeStyle)resource.MultiEpisodeStyle,
+                ColonReplacementFormat = (ColonReplacementFormat)resource.ColonReplacementFormat,
                 StandardEpisodeFormat = resource.StandardEpisodeFormat,
                 DailyEpisodeFormat = resource.DailyEpisodeFormat,
                 AnimeEpisodeFormat = resource.AnimeEpisodeFormat,
