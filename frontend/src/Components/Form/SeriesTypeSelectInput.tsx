@@ -37,7 +37,7 @@ const seriesTypeOptions: ISeriesTypeOption[] = [
     key: seriesTypes.EPISODE_TITLE,
     value: 'Episode Title',
     format: 'Episodes identified by the Episode Title',
-  }
+  },
 ];
 
 function SeriesTypeSelectInput(props: SeriesTypeSelectInputProps) {
